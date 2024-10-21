@@ -2,6 +2,7 @@ from libqtile import layout
 from libqtile.config import Click, Drag, Group, Key, Match
 from libqtile.lazy import lazy
 from libqtile.widget import backlight
+from qtile_extras.popup.templates.mpris2 import COMPACT_LAYOUT, DEFAULT_LAYOUT
 
 mod = "mod4"
 terminal = "kitty"
@@ -66,6 +67,7 @@ keys = [
         "m",
         lazy.spawn("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),
     ),
+    Key([mod], "p", lazy.widget["mpris2"].show_popup(DEFAULT_LAYOUT)),
     # Key(
     #    [mod, "alt"],
     #     "s",
@@ -123,7 +125,7 @@ keys = [
     Key(
         [],
         "print",
-        lazy.spawn("maim ~/Pictures/Screenshots/$(date +%s).png "),
+        lazy.spawn("maim ~/Pictures/Screenshots/$(date +%s).png ", shell=True),
         desc="Launch File Manager",
     ),
     # Toggle between different layouts as defined below

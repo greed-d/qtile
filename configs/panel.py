@@ -1,10 +1,53 @@
 from libqtile import bar, widget
+from libqtile.lazy import lazy
 from libqtile.config import Screen
 from qtile_extras import widget as ex_widget
 from qtile_extras.popup.templates.mpris2 import DEFAULT_LAYOUT
-from qtile_extras.widget.decorations import RectDecoration
+from qtile_extras.widget.decorations import RectDecoration, BorderDecoration
 from qtile_extras.widget.groupbox2 import GroupBoxRule
 from configs.window_map import CustomWindowName
+from configs.volume_widget import VOLUME_NOTIFICATION
+
+
+def draw_bottom_line_margin(line_colour="fff", line_width=1, margin=0):
+    def _wrapper(box):
+        ctx = box.drawer.ctx
+        ctx.set_line_width(line_width)
+        ctx.new_sub_path()
+        ctx.move_to(0, box.bar.height - margin + 2)
+        ctx.line_to(box.size, box.bar.height - margin + 2)
+        box.drawer.set_source_rgb(line_colour)
+        ctx.stroke()
+
+    return _wrapper
+
+
+ws_decoration = {
+    "decorations": [
+        RectDecoration(
+            colour="#1e1e2e", radius=6, filled=True, padding_y=5, group=True
+        ),
+        BorderDecoration(
+            colour="#fab387",
+            border_width=1,
+            radius=6,
+            padding_y=5,
+        ),
+    ],
+    "padding": 10,
+}
+layout_group = {
+    "decorations": [
+        RectDecoration(
+            colour="#1e1e2e",
+            radius=6,
+            filled=True,
+            padding_y=5,
+            group=True,
+        )
+    ],
+    # "padding": 10,
+}
 
 decoration_group = {
     "decorations": [
@@ -49,12 +92,15 @@ screens = [
                     width=1,
                     rules=[
                         GroupBoxRule(
-                            text_colour="#a6e3a1", line_colour="#a6e3a1", line_width=4
+                            text_colour="#a6e3a1",
+                            custom_draw=draw_bottom_line_margin(
+                                line_colour="#a6e3a1", line_width=3, margin=10
+                            ),
                         ).when(screen=GroupBoxRule.SCREEN_THIS),
                         GroupBoxRule(text_colour="#89b4fa").when(occupied=True),
                         GroupBoxRule(text_colour="#585b70"),
                     ],
-                    **decoration_group,
+                    **ws_decoration,
                 ),
                 widget.Chord(
                     chords_colors={
@@ -63,6 +109,17 @@ screens = [
                     name_transform=lambda name: name.upper(),
                 ),
                 widget.Spacer(),
+                ex_widget.CurrentLayoutIcon(
+                    foreground="#a6e3a1",
+                    padding=8,
+                    scale=0.4,
+                    margin=0,
+                    **layout_group,
+                ),
+                ex_widget.CurrentLayout(
+                    foreground="#a6e3a1", padding=8, **layout_group
+                ),
+                widget.Spacer(length=7),
                 ex_widget.CheckUpdates(
                     colour_have_updates="#f38ba8",
                     colour_no_updates="#cba6f7",
@@ -78,6 +135,24 @@ screens = [
                     **decoration_group,
                 ),
                 widget.Spacer(length=7),
+                ex_widget.PulseVolumeExtra(
+                    bar_colour_normal="#a6e3a1",
+                    bar_colour_loud="#f38ba8",
+                    bar_colour_high="#fab387",
+                    bar_width=70,
+                    bar_height=27,
+                    **decoration_group,
+                    # decorations=[
+                    #     RectDecoration(
+                    #         colour="#1e1e2e",
+                    #         radius=6,
+                    #         filled=True,
+                    #         padding_y=5,
+                    #         group=True,
+                    #     )
+                    # ],
+                ),
+                widget.Spacer(length=7),
                 ex_widget.Wlan(
                     foreground="#cba6f7",
                     show_image=True,
@@ -85,7 +160,10 @@ screens = [
                     **decoration_group,
                 ),
                 widget.Spacer(length=7),
-                ex_widget.CurrentLayout(foreground="#89dceb", **decoration_group),
+                ex_widget.Battery(
+                    format="{percent:2.0%}",
+                    **decoration_group,
+                ),
                 widget.Spacer(length=7),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
@@ -100,7 +178,7 @@ screens = [
                 ),
                 widget.Spacer(length=7),
             ],
-            40,
+            43,
             background="#45475a",
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
