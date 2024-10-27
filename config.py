@@ -23,19 +23,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 import subprocess
 from os import path
 
-from libqtile import bar, hook, layout, qtile, widget
+from libqtile import bar, layout, qtile, widget, hook
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
-
 from configs.keybinds import keys
-from configs.panel import screens
 from configs.path import qtile_path
+from configs.panel import screens
 
-# from settings.panel import screens
 mod = "mod4"
 
 
@@ -57,6 +54,7 @@ for vt in range(1, 8):
         )
     )
 
+
 groups = [
     Group(
         "1",
@@ -75,32 +73,98 @@ groups = [
     ),
     Group("3", label=""),
     Group("4", label=""),
-    Group("5", label=""),
+    Group(
+        "5",
+        label="",
+        matches=[
+            Match(wm_class="TelegramDesktop"),
+            Match(wm_class="telegram-desktop"),
+        ],
+    ),
     Group(
         "6",
         label="󰉋",
         matches=[
             Match(wm_class="thunar"),
+            Match(wm_class="Thunar"),
         ],
     ),
     Group("7", label=""),
     Group(
-        "8", label="󰓇", matches=[Match(wm_class="spotify"), Match(wm_class="Spotify")]
+        "8",
+        label="󰓇",
+        matches=[Match(wm_class="spotify"), Match(wm_class="Spotify")],
+        spawn="spotify-launcher",
     ),
     Group(
-        "9", label="󰙯", matches=[Match(wm_class="spotify"), Match(wm_class="armcord")]
+        "9",
+        label="󰙯",
+        matches=[
+            Match(wm_class="armcord"),
+            Match(wm_class="vesktop"),
+        ],
+        spawn="vesktop",
     ),
+    Group(
+        "0",
+        label="",
+    ),
+    # ScratchPad(
+    #     "`",
+    #     [
+    #         # define a drop down terminal.
+    #         # it is placed in the upper third of screen by default.
+    #         DropDown("term", "kitty", opacity=0.8),
+    #         # define another terminal exclusively for ``qtile shell` at different position
+    #         DropDown(
+    #             "bashtop",
+    #             "kitty -e btop",
+    #             x=0.05,
+    #             y=0.4,
+    #             width=0.9,
+    #             height=0.6,
+    #             opacity=0.9,
+    #             on_focus_lost_hide=True,
+    #         ),
+    #     ],
+    # ),
 ]
+
+# for i, group in enumerate(groups):
+#     actual_key = str(i+1)
+#     keys.extend(
+#         [
+#             Key(
+#                 [mod],
+#                 actual_key,
+#                 lazy.spawn(f"/home/greed/.config/picom/workspace_animation.sh {actual_key}")
+#
+#             ),
+#             Key(
+#                 [mod, "shift"],
+#                 i.name,
+#                 lazy.window.togroup(i.name),
+#                 desc="move focused window to group {}".format(i.name),
+#             )
+#         ]
+#     )
 
 # Magic behind groups
 for i in groups:
+    if int(i.name) == 0:
+        actual_key = int(9)
+    else:
+        actual_key = int(i.name) - 1
+
     keys.extend(
         [
             # mod + group number = switch to group
             Key(
                 [mod],
                 i.name,
-                lazy.group[i.name].toscreen(),
+                lazy.spawn(
+                    f"/home/greed/.config/picom/workspace_animation.sh {actual_key}"
+                ),
                 desc="Switch to group {}".format(i.name),
             ),
             Key(
@@ -113,19 +177,19 @@ for i in groups:
     )
 
 layouts = [
-    layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
-    layout.Max(),
-    # Try more layouts by unleashing below layouts.
-    # layout.Stack(num_stacks=2),
-    layout.Bsp(),
-    layout.Matrix(),
-    layout.MonadTall(),
-    layout.MonadWide(),
+    layout.Bsp(
+        border_width=2, margin=10, border_focus="#cba6f7", border_normal="#24273A"
+    ),
+    layout.Max(margin=4),
+    layout.Columns(margin=4, border_focus_stack=["#cba6f7", "#24273A"], border_width=3),
+    layout.Matrix(margin=4),
+    # layout.MonadTall(margin=4),
+    # layout.MonadWide(margin=4),
+    layout.Tile(margin=4),
     # layout.RatioTile(),
-    layout.Tile(),
-    # layout.TreeTab(),
+    layout.TreeTab(),
     # layout.VerticalTile(),
-    layout.Zoomy(),
+    # layout.Zoomy(),
 ]
 
 widget_defaults = dict(
@@ -135,20 +199,6 @@ widget_defaults = dict(
 )
 extension_defaults = widget_defaults.copy()
 
-
-# Drag floating layouts.
-mouse = [
-    Drag(
-        [mod],
-        "Button1",
-        lazy.window.set_position_floating(),
-        start=lazy.window.get_position(),
-    ),
-    Drag(
-        [mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()
-    ),
-    Click([mod], "Button2", lazy.window.bring_to_front()),
-]
 
 dgroups_key_binder = None
 dgroups_app_rules = []  # type: list
@@ -164,8 +214,13 @@ floating_layout = layout.Floating(
         Match(wm_class="makebranch"),  # gitk
         Match(wm_class="maketag"),  # gitk
         Match(wm_class="ssh-askpass"),  # ssh-askpass
+        Match(wm_class="xdm-app"),  # ssh-askpass
+        Match(wm_class="Xdm-app"),  # ssh-askpass
+        Match(wm_class="nwg-look"),  # ssh-askpass
         Match(title="branchdialog"),  # gitk
         Match(title="pinentry"),  # GPG key password entry
+        Match(title="Download Complete"),  # GPG key password entry
+        Match(title="Delete profile"),  # GPG key password entry
     ]
 )
 auto_fullscreen = True
