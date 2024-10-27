@@ -1,16 +1,8 @@
-#!/bin/sh
+#!/bin/bash
+#start nitrogen
+nitrogen --restore
 
-#nitrogen
-nitrogen --restore &
+#Start polkit agent
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
-#Blurring
-# picom --experimental-backends --config ~/.config/picom/picom.conf.qtile &
-
-# systray battery icon
-# cbatticon -u 5 &
-
-# systray volume
-# volctl &
-
-#Discord
-# discord &
+picom --config /home/greed/.config/picom/picom.qtile.conf &
